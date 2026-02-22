@@ -45,7 +45,7 @@ def run_batch(num_problems: int, num_simulations: int = 10) -> float:
 
 def main():
     max_problems = 50
-    num_simulations = 10
+    num_simulations = 20
 
     problems_list = list(range(max_problems, 0, -1))  # 50 down to 1
     avg_steps_list = []
@@ -55,38 +55,23 @@ def main():
         avg_steps_list.append(avg_steps)
         print(f"Problems: {num_problems:3d}  |  Avg steps: {avg_steps:10.1f}")
 
-    # Also include 0 problems (infinite run — cap at a large number for display)
-    # With 0 problems, threshold = 1.0 and the simulation never stops.
-    # We skip 0 to avoid an infinite loop, but note the theoretical value is infinity.
-
-    # Plot results
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
-
-    # Left plot: linear Y scale
-    ax1.plot(problems_list, avg_steps_list, "o-", color="steelblue", markersize=4)
-    ax1.set_xlabel("Number of Problems")
-    ax1.set_ylabel("Average Time Steps Before Failure")
-    ax1.set_title("Obstacle Removal vs Time on Task (Linear Scale)")
-    ax1.invert_xaxis()
-    ax1.grid(True, alpha=0.3)
-
-    # Right plot: log Y scale to show the hyperbolic / exponential growth
-    ax2.plot(problems_list, avg_steps_list, "o-", color="darkorange", markersize=4)
-    ax2.set_xlabel("Number of Problems")
-    ax2.set_ylabel("Average Time Steps Before Failure (log scale)")
-    ax2.set_title("Obstacle Removal vs Time on Task (Log Scale)")
-    ax2.set_yscale("log")
-    ax2.invert_xaxis()
-    ax2.grid(True, alpha=0.3, which="both")
-
-    # Add theoretical curve: E[steps] = 1 / (1 - 0.99^n) for geometric distribution
+    # Plot results — single linear plot
     import numpy as np
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    ax.plot(problems_list, avg_steps_list, "o-", color="steelblue", markersize=4, label="Simulated (20 runs)")
+    ax.set_xlabel("Number of Problems")
+    ax.set_ylabel("Average Time Steps Before Failure")
+    ax.set_title("Obstacle Removal vs Time on Task")
+    ax.invert_xaxis()
+    ax.grid(True, alpha=0.3)
+
+    # Theoretical curve: E[steps] = 1 / (1 - 0.99^n) for geometric distribution
     n_theory = np.arange(1, max_problems + 1)
     expected_steps = 1.0 / (1.0 - 0.99 ** n_theory)
-    ax1.plot(n_theory, expected_steps, "--", color="red", alpha=0.6, label="Theoretical E[steps]")
-    ax2.plot(n_theory, expected_steps, "--", color="red", alpha=0.6, label="Theoretical E[steps]")
-    ax1.legend()
-    ax2.legend()
+    ax.plot(n_theory, expected_steps, "--", color="red", alpha=0.6, label="Theoretical E[steps]")
+    ax.legend()
 
     plt.tight_layout()
     plt.savefig("obstacle_simulation_results.png", dpi=150, bbox_inches="tight")
